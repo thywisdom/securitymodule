@@ -1,98 +1,41 @@
-💡 **TASK: FULL CODEBASE ANALYSIS + API CONVERSION**
+Analyze the following architectural problem and propose a complete, efficient, and scalable implementation:
 
-You are an expert Rust engineer and cryptography specialist.
-I have cloned the repository:
+We are integrating a Ring-LWE based security module as an isolated cryptographic service for a mail application called QMail. The Ring-LWE module exposes three endpoints: /keygen, /encrypt, and /decrypt. Each key generation request returns a public key and a secret key. QMail must use these keys to encrypt outgoing mail content and decrypt incoming mail content, achieving a quantum-resistant message transfer pipeline.
 
-**[https://github.com/lattice-based-labs/ring-lwe.git](https://github.com/lattice-based-labs/ring-lwe.git)**
+You must analyze the existing Ring-LWE implementation and answer:
 
-Your job is to perform the following:
+1. How can this security module be cleanly incorporated into QMail through HTTP endpoints so the main application securely sends plaintext for encryption and receives ciphertext back, and vice versa?
 
-### **1. FULL PROJECT ANALYSIS**
+2. Does the current Ring-LWE implementation support concurrent requests? Can it handle multiple keygen, encrypt, and decrypt requests at high throughput, or is it single-threaded? If not scalable, define how to make it scalable.
 
-* Read and analyze the entire repository.
-* Summarize the architecture and how the Ring-LWE scheme is implemented.
-* Identify:
+3. Since keygen returns a pair of keys (public, secret), what is the correct, secure, and efficient strategy for:
+   - Storing keys for each mail transfer?
+   - Using the right key again for decrypting a specific message later?
+   - Linking keys to message sessions in a clean architecture?
 
-  * key generation functions
-  * encryption function(s)
-  * decryption function(s)
-  * polynomial operations
-  * noise sampling mechanism
-  * parameter sets
-* Explain how the library ensures correctness and security (in simple terms).
+4. Describe how QMail should store and reuse public/secret keys per message transaction. Provide a recommended workflow for:
+   - key generation request
+   - associating the keys with a message
+   - encrypting content using the public key
+   - sending encrypted payload
+   - decrypting using the secret key when needed
 
-### **2. DESIGN A SECURE, ISOLATED API SERVICE**
+5. Provide an efficient architectural model for how these endpoints should be used together to build a quantum-resistant message sending and receiving pipeline.
 
-Transform this Rust project into a standalone microservice:
+6. Propose improvements to the Ring-LWE service so it can handle large-scale concurrent requests (hundreds or thousands per minute). Describe thread-safety, async, connection handling, and performance tuning.
 
-#### The service should expose these REST API endpoints:
+7. Provide the actual recommended implementation pattern (code-level or structural) for achieving:
+   - stateless scalable API
+   - safe key storage strategy
+   - concurrency support
+   - request/response structure
+   - message-to-key mapping
+   - secure serialization formats (Base64, etc.)
 
-| Endpoint   | Method | Description                                       |
-| ---------- | ------ | ------------------------------------------------- |
-| `/health`  | GET    | Returns “OK”                                      |
-| `/keygen`  | POST   | Returns publicKey + secretKey                     |
-| `/encrypt` | POST   | Input: message + publicKey → Output: ciphertext   |
-| `/decrypt` | POST   | Input: ciphertext + secretKey → Output: plaintext |
+Your answer must include:
+- A clear workflow diagram (text-based is fine)
+- A production-ready architecture
+- Concrete, efficient implementation details suitable for real deployment
+- Notes on ensuring the system remains quantum-resistant, fast, and scalable
 
-### **3. DEVELOP THE APPLICATION STRUCTURE**
-
-Generate a full plan for turning this into a production-ready API:
-
-* Decide on framework (Axum preferred, otherwise Actix/Web)
-* Directory structure
-* Modules:
-
-  * `crypto/` → Ring-LWE core functions
-  * `api/` → handlers for endpoints
-  * `models/` → request/response DTOs
-  * `service/` → encryption service logic
-* Error-handling design
-* Serialization format (JSON + Base64 for ciphertext)
-
-### **4. IMPLEMENTATION**
-
-Write the full implementation, including:
-
-* `Cargo.toml` (with dependencies)
-* `main.rs`
-* `routes.rs`
-* `handlers/*.rs`
-* `crypto/*.rs`
-* `models/*.rs`
-* And any helper modules.
-
-### **5. SECURITY GUIDELINES**
-
-Apply:
-
-* Zero-copy optimizations where safe
-* Avoid serialization leaks
-* Explain limitations of this simple Ring-LWE implementation
-* Recommend protections for production use
-
-### **6. DOCKER SUPPORT**
-
-Generate:
-
-* A production-ready `Dockerfile`
-* A multi-stage build to minimize image size
-* Instructions for running the service on any platform
-
-### **7. OPTIONAL (IF CODEBASE IS OUTDATED)**
-
-* Update code to Rust 2021/2024 edition
-* Remove deprecated dependencies
-* Improve module structure
-
-### **8. FINAL OUTPUT**
-
-Produce:
-
-✔ A full explanation of the repo
-✔ A detailed plan for turning it into an API service
-✔ The actual Rust source code for the API
-✔ Ready-to-deploy Dockerfile
-✔ Commands for testing endpoints using curl or Postman
-✔ A short security review
-
----
+Now analyze and give the best possible solution and implementation plan.

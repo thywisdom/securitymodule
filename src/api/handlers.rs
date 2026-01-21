@@ -7,8 +7,10 @@ pub async fn health_check() -> &'static str {
 }
 
 pub async fn keygen_handler() -> Json<KeygenResponse> {
-    let params = Parameters::default();
-    let keys = keygen::keygen_string(&params, None);
+    let keys = tokio::task::spawn_blocking(move || {
+        let params = Parameters::default();
+        keygen::keygen_string(&params, None)
+    }).await.unwrap();
     
     Json(KeygenResponse {
         public_key: keys.get("public").unwrap().clone(),
@@ -17,8 +19,10 @@ pub async fn keygen_handler() -> Json<KeygenResponse> {
 }
 
 pub async fn encrypt_handler(Json(payload): Json<EncryptRequest>) -> Json<EncryptResponse> {
-    let params = Parameters::default();
-    let ciphertext = encrypt::encrypt_string(&payload.public_key, &payload.message, &params, None);
+    let ciphertext = tokio::task::spawn_blocking(move || {
+        let params = Parameters::default();
+        encrypt::encrypt_string(&payload.public_key, &payload.message, &params, None)
+    }).await.unwrap();
     
     Json(EncryptResponse {
         ciphertext,
@@ -26,8 +30,10 @@ pub async fn encrypt_handler(Json(payload): Json<EncryptRequest>) -> Json<Encryp
 }
 
 pub async fn decrypt_handler(Json(payload): Json<DecryptRequest>) -> Json<DecryptResponse> {
-    let params = Parameters::default();
-    let message = decrypt::decrypt_string(&payload.secret_key, &payload.ciphertext, &params);
+    let message = tokio::task::spawn_blocking(move || {
+        let params = Parameters::default();
+        decrypt::decrypt_string(&payload.secret_key, &payload.ciphertext, &params)
+    }).await.unwrap();
     
     Json(DecryptResponse {
         message,
