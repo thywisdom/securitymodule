@@ -1,4 +1,4 @@
-use axum::{Json, http::StatusCode};
+use axum::Json;
 use crate::models::{KeygenResponse, EncryptRequest, EncryptResponse, DecryptRequest, DecryptResponse};
 use crate::crypto::{keygen, encrypt, decrypt, utils::Parameters};
 
